@@ -51,9 +51,9 @@ async function sandbox () {
 
     console.log('\n');
 
-    const result = await db.insert(products);
+    //const result = await db.insert(products);
 
-    console.log(`💽  ${result.insertedCount} inserted products`);
+    //console.log(`💽  ${result.insertedCount} inserted products`);
 
     console.log('\n');
 
