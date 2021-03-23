@@ -9,22 +9,23 @@ const cheerio = require('cheerio');
 const parse = data => {
   const $ = cheerio.load(data);
 
-  return $('.productList-container .productList')
+  return $('.product-link .product-meta')
     .map((i, element) => {
       const name = $(element)
-        .find('.productList-title')
+        .find('.product-title')
         .text()
         .trim()
         .replace(/\s/g, ' ');
       const price = parseInt(
         $(element)
-          .find('.productList-price')
+          .find('.product-price')
+          .first()
           .text()
-      
-      
+          .replace(/\s|(Buy)|€/g, '')
+          .replace(/,/g, '.')
       );
 
-      return {name, price };
+      return {name, price};
     })
     .get();
 };
@@ -47,7 +48,7 @@ module.exports.scrape_products = async url => {
   return null;
 };
 
- //Scrape all links on the welcome page of the website
+//Scrape all links on the welcome page of the website
 module.exports.scrape_links = async url => {
   const response = await axios(url);
   const {data, status} = response;
@@ -61,17 +62,16 @@ module.exports.scrape_links = async url => {
   return null;
 };
 
-
 const parse_links = data => {
   const $ = cheerio.load(data);
 
-  return $('.mainNavigation-fixedContainer .mainNavigation-link-subMenu-link')
+  return $('.header-navigation--primary .header-nav-list-item')
     .map((i, element) => {
       const link = $(element)
-        .find('.mainNavigation-link-subMenu-link > a[href]')
+        .find('.header-nav-list-item > a[href]')
         .attr('href')
 
       return link;
     })
     .get();
-}; 
+};

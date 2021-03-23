@@ -15,6 +15,7 @@ const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
 const selectSort = document.querySelector('#sort-select');
 const NbProducts = document.querySelector('#nbProducts');
+const last = document.querySelector('#last_realeased');
 /**
  * Set global value
  * @param {Array} result - products to display
@@ -129,6 +130,9 @@ const renderIndicators = pagination => {
   const {count} = pagination;
 
   spanNbProducts.innerHTML = count;
+  
+  
+  
 };
 
 const render = (products, pagination) => {
@@ -208,6 +212,7 @@ function SortRecent(currentProducts){
   }
   filterBrands(RecentProducts, selectBrands.value);
 }
+
 function compareDatedesc(a,b){
   if(a.released < b.released)
    return -1;

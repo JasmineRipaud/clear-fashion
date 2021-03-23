@@ -8,7 +8,7 @@ eshops.push('https://mudjeans.eu/');
 eshops.push('https://adresse.paris/');
 const {MongoClient} = require('mongodb');
 //A MODIFIER
-const MONGODB_URI = "mongodb+srv://AFR2512:<password>@clearfashion.mbe0y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb+srv://AFR2512:Bellecreole44@clearfashion.mbe0y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const MONGODB_DB_NAME = 'clearfashion';
 
 
@@ -97,8 +97,9 @@ async function mudjeans_scrapping(eshop, brand = 'MUDJEANS'){
      // toJsonFile.productToJsonFile(products, brand);
      mudjeans_product = mudjeans_product.concat(products);
     }
+    console.log('Mudjeans scrapping done');
     return mudjeans_product
-    console.log('Mudjeans scrapping done');    
+        
   } catch (e) {
     console.error(e);
     process.exit(1);

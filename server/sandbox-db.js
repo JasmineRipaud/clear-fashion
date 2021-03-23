@@ -59,7 +59,7 @@ async function sandbox () {
 
     console.log('💽  Find Loom products only');
 
-    const loomOnly = await db.find({'brand': 'loom'});
+    const loomOnly = await db.find({'brand': 'loom'},10);
 
     console.log(`👕 ${loomOnly.length} total of products found for Loom`);
     console.log(loomOnly);
