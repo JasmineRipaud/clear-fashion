@@ -34,8 +34,9 @@ const setCurrentProducts = ({result, meta}) => {
  */
 const fetchProducts = async (page = 1, size = 12) => {
   try {
-    const response = await fetch(`https://clear-fashion-api.vercel.app?page=${page}&size=${size}`);
+    const response = await fetch(`https://server-sigma-six.vercel.app/?page=${page}&size=${size}`);
     const body = await response.json();
+    console.log(response)
 
     if (body.success !== true) {
       console.error(body);
@@ -112,14 +113,14 @@ function filterBrands(currentProducts, filterBrand){
  * @param  {Object} pagination
  */
 const renderPagination = pagination => {
-  const {currentPage, pageCount} = pagination;
+  const {page, page_count} = pagination;
   const options = Array.from(
-    {'length': pageCount},
+    {'length': page_count+1},
     (value, index) => `<option value="${index + 1}">${index + 1}</option>`
   ).join('');
 
   selectPage.innerHTML = options;
-  selectPage.selectedIndex = currentPage - 1;
+  selectPage.selectedIndex = page-1;
 };
 
 /**
