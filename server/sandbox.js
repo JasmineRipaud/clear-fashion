@@ -3,9 +3,7 @@ const dedicatedbrand = require('./sources/dedicatedbrand');
 const toJsonFile = require('./sources/toJsonFile');
 const mudjeans = require('./sources/mudjeans');
 const adresseparis = require('./sources/adresseparis');
-const eshops = ['https://www.dedicatedbrand.com'];
-eshops.push('https://mudjeans.eu/');
-eshops.push('https://adresse.paris/');
+const eshops = ['https://www.dedicatedbrand.com','https://mudjeans.eu/','https://adresse.paris/'];
 const {MongoClient} = require('mongodb');
 //A MODIFIER
 const MONGODB_URI = "mongodb+srv://AFR2512:Bellecreole44@clearfashion.mbe0y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
