@@ -115,7 +115,7 @@ function filterBrands(currentProducts, filterBrand){
 const renderPagination = pagination => {
   const {page, page_count} = pagination;
   const options = Array.from(
-    {'length': page_count+1},
+    {'length': page_count},
     (value, index) => `<option value="${index + 1}">${index + 1}</option>`
   ).join('');
 
@@ -159,7 +159,7 @@ selectShow.addEventListener('change', event => {
 
 //Feature 1
 selectPage.addEventListener('change', event => {
-  fetchProducts(parseInt(event.target.value), selectShow.value)
+  fetchProducts(parseInt(event.target.value), currentPagination.page_size)
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
 });

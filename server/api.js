@@ -14,42 +14,58 @@ app.options('*', cors());
 
 
 app.get('/', async(request, response) => {
-  let size;
-  let page;
-  if(request.query.size != null & request.query.page != null){
-    size = parseInt(request.query.size);
-    page = parseInt(request.query.page);
-  }else{
-    size = 10
-    page = 1
+  const query = request.query;
+  try{
+    if(query.size){
+      if(query.page){
+        const result = await db.find({},{_id:0},parseInt(query.page),parseInt(query.size))
+        response.send(result)
+
+      }else{
+        const result = await db.find({},{_id:0},1,parseInt(query.size))
+        response.send(result)}
+    }
+    else if(query.brand){
+      const result = await db.find({"brand" : query.brand},{_id:0})
+      response.send(result)
+    }
+    else if (query.price){
+      const result = await db.find({"price" : {$lte : parseInt(query.price)}},{_id:0})
+      response.send(result)
+    }
+    else if(query.brand && query.price){
+      const result = await db.find({"brand" : query.brand, "price" : {$lte : parseInt(query.price)}},{_id : 0})
+      response.send(result)
+    }
+    else if(query.brand && query.size){
+      if(query.page){
+        const result = await db.find({"brand" : query.brand},{_id:0},parseInt(query.page),parseInt(query.size))
+        response.send(result)
+
+      }else{
+        const result = await db.find({"brand" : query.brand},{_id : 0},1,parseInt(query.size))
+        response.send(result)
+      }
+    }
+    else if(query.size && query.price){
+      const result = await db.find({"price" : {$lte : parseInt(query.price)}},{_id : 0},1,parseInt(query.size))
+      response.send(result)
+    }
+    else if(query.size && query.price && query.brand){
+      if(query.page){
+        const result = await db.find({"brand" : query.brand, "price" : {$lte : parseInt(query.price)}},{_id:0},parseInt(query.page),parseInt(query.size))
+        response.send(result)
+      }else{
+        const result = await db.find({"brand" : query.brand, "price" : {$lte : parseInt(query.price)}},{_id : 0},1,parseInt(query.size))
+        response.send(result)}
+    }else {
+			const result = await db.find({},{_id : 0});
+			response.send(result);
+    }
+  }catch(e){
+    response.send(e)
   }
-
-  let res = await db.find({},{_id:0},page,size);
-  let success = true
-  let total = res.length;
-
-  response.send({
-    'success': success,
-    'total':total,
-    'data':res
-  });
 })
-
-
-// app.get('/products/search', async(request, response) => {
-//   	let brand = request.query.brand;
-// 	  let price = parseInt(request.query.price);
-// 	  let limit = parseInt(request.query.limit);
-//   	let res = await db.find({'brand' : brand,'price' : {$lte:price}},limit);
-//   	let total = res.length;
-
-//   	response.send({
-//   		'limit':limit,
-//   		'total':total,
-//   		'results':res
-//   	});
-// })
-
 
 
 app.listen(PORT);
