@@ -16,6 +16,11 @@ const spanNbProducts = document.querySelector('#nbProducts');
 const selectSort = document.querySelector('#sort-select');
 const NbProducts = document.querySelector('#nbProducts');
 const last = document.querySelector('#last_realeased');
+const goodprice = document.querySelector('#goodprice');
+const recent = document.querySelector('#recent');
+const spanP50 = document.querySelector('#p50');
+const spanP90 = document.querySelector('#p90');
+const spanP95 = document.querySelector('#p95');
 /**
  * Set global value
  * @param {Array} result - products to display
@@ -32,9 +37,9 @@ const setCurrentProducts = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
-const fetchProducts = async (page = 1, size = 12) => {
+const fetchProducts = async (page = 0, size=12) => {
   try {
-    const response = await fetch(`https://server-sigma-six.vercel.app/?page=${page}&size=${size}`);
+    const response = await fetch(`https://server-five-khaki.vercel.app/products/search?page=${page}&size=${size}`);
     const body = await response.json();
     console.log(response)
 
@@ -113,14 +118,15 @@ function filterBrands(currentProducts, filterBrand){
  * @param  {Object} pagination
  */
 const renderPagination = pagination => {
-  const {page, page_count} = pagination;
+  const {currentPage, pageCount} = pagination;
+  console.log(pageCount,currentPage)
   const options = Array.from(
-    {'length': page_count},
-    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
+    {'length': pageCount},
+    (value, index) => `<option value="${index+1}">${index+1}</option>`
   ).join('');
 
   selectPage.innerHTML = options;
-  selectPage.selectedIndex = page-1;
+  selectPage.selectedIndex = currentPage;
 };
 
 /**
@@ -129,11 +135,10 @@ const renderPagination = pagination => {
  */
 const renderIndicators = pagination => {
   const {count} = pagination;
-
   spanNbProducts.innerHTML = count;
-  
-  
-  
+  spanP50.innerHTML = percentile(currentProducts,0.5);
+  spanP90.innerHTML = percentile(currentProducts,0.9);
+  spanP95.innerHTML = percentile(currentProducts,0.95);
 };
 
 const render = (products, pagination) => {
@@ -159,7 +164,7 @@ selectShow.addEventListener('change', event => {
 
 //Feature 1
 selectPage.addEventListener('change', event => {
-  fetchProducts(parseInt(event.target.value), currentPagination.page_size)
+  fetchProducts(parseInt(event.target.value)-1, currentPagination.pageSize)
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
 });
@@ -167,107 +172,96 @@ selectPage.addEventListener('change', event => {
 //Feature 2
 
 selectBrands.addEventListener('change', event => {
-    (SortChoice(currentProducts, selectSort.value));
+    filterBrands(currentProducts,event.target.value);
 });
+
+
+selectSort.addEventListener('change', event => {
+    renderProducts(SortChoice(currentProducts, event.target.value));
+});
+
+
 
 document.addEventListener('DOMContentLoaded', () =>
   fetchProducts()
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination))
 );
+
+
+goodprice.addEventListener('change', (event) => {
+  if (goodprice.checked) {
+    renderProducts(filterprice(currentProducts));
+  }
+  else {
+    renderProducts(currentProducts);
+  }
+})
+
+recent.addEventListener('change', event =>{
+  recent.checked ? renderProducts(filterrelease(currentProducts)) : renderProducts(currentProducts)
+})
 // Feature 
 // Feature 3,4,5 and 6
 
-function SortChoice(currentProducts,selecSort){
-  if (selectSort.value == 'date-desc')
-   SortDate(currentProducts,'desc');
-  if (selectSort.value == 'date-asc')
-    SortDate(currentProducts,'asc');
-  if (selectSort.value == 'price-asc')
-    SortPrice(currentProducts,'desc');
-  if (selectSort.value == 'price-desc')
-    SortPrice(currentProducts,'asc');
-  if (selectSort.value == 'affordable')
-    SortAffordable(currentProducts);
-  if (selectSort.value == 'new-released')
-    SortRecent(currentProducts);
-}
-
-function SortAffordable(currentProducts){
-  let affordableproducts = [];
-  for(let i = 0; i < currentProducts.length; i++){
-    if(currentProducts[i].price < 50){
-      affordableproducts.push(currentProducts[i]);
-    }
+function SortChoice(products,Sort){
+  switch(Sort){
+    case "price-asc":
+      return sortby_price(products,true);
+    case "price-desc":
+      return sortby_price(products,false);
+    case "date-asc":
+      return sortby_date(products,true);
+    case "date-desc":
+      return sortby_date(products,false);
+    default :
+      return products;
   }
-  filterBrands(affordableproducts, selectBrands.value);
-}
-function SortRecent(currentProducts){
-  var date = new Date();
-  let RecentProducts = [];
-  for(let i = 0; i < currentProducts.length; i++){
-    var DateProduct = new Date(currentProducts[i].released);
-    if(date - DateProduct< 86400*15000){
-      RecentProducts.push(currentProducts[i]);
-    }
-  }
-  filterBrands(RecentProducts, selectBrands.value);
+  
 }
 
-function compareDatedesc(a,b){
-  if(a.released < b.released)
-   return -1;
-  if(a.released > b.released)
-   return 1;
-  return 0;
-}
-function compareDateasc(a,b){
-  if(a.released < b.released)
-   return 1;
-  if(a.released > b.released)
-   return -1;
-  return 0;
-}
-function comparePricedesc(a,b){
-  if(a.price < b.price)
-   return -1;
-  if(a.price > b.price)
-   return 1;
-  return 0;
-}
-function comparePriceasc(a,b){
-  if(a.price < b.price)
-   return 1;
-  if(a.price > b.price)
-   return -1;
-  return 0;
-}
-
-function SortDate(currentProducts,type){
-  if(type == 'desc'){
-    let sortedProducts = currentProducts.sort(compareDatedesc);
-    filterBrands(sortedProducts,selectBrands.value);
-  }
-
-  else{
-    let sortedProducts = currentProducts.sort(compareDateasc);
-    filterBrands(sortedProducts,selectBrands.value);
-  }
-
-
-}
-function SortPrice(currentProducts,type){
-  if(type == 'desc'){
-    let sortedProducts = currentProducts.sort(comparePricedesc);
-    filterBrands(sortedProducts,selectBrands.value);
+function sortby_price(list,desc){
+  console.log("prices")
+  if(desc){
+    return list.sort(function (a, b) {
+      return a.price - b.price;
+    });
   }
   else{
-    let sortedProducts = currentProducts.sort(comparePriceasc);
-    filterBrands(sortedProducts,selectBrands.value);
+    return list.sort(function (a, b) {
+      return b.price - a.price;
+    });
   }
 
 }
 
-selectSort.addEventListener('change', event => {
-  SortChoice(currentProducts, event.target.value);
-});
+function sortby_date(list,desc){
+  console.log("dates")
+  return list.sort(function (a, b) {
+    var date1 = new Date(a.released);
+    var date2 = new Date(b.released);
+    if(desc){
+      return  date1-date2;
+    }
+    else{
+      return  date2-date1;
+
+    }
+
+  });
+}
+
+const filterprice=(products) => {
+  return products.filter(product => product.price < 50)
+}
+
+const filterrelease=(products) => {
+  return products.filter(product => Date.parse(product.released) > Date.now()-1000*3600*24*300)
+}
+
+function percentile(products,n){
+  var sorted = sortby_price(products,true);
+  var pos = Math.round(((sorted.length) - 1) * n);
+  return sorted[pos].price;
+}
+

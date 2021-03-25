@@ -13,59 +13,51 @@ app.use(helmet());
 app.options('*', cors());
 
 
-app.get('/', async(request, response) => {
-  const query = request.query;
+app.get('/products/search', async(req, response) => {
   try{
-    if(query.size){
-      if(query.page){
-        const result = await db.find({},{_id:0},parseInt(query.page),parseInt(query.size))
-        response.send(result)
+    let res;
+    let meta;
+  if(req.query.brand){
+    res = await db.findPage(parseInt(req.query.page),parseInt(req.query.size),{'brand': req.query.brand});
+    meta = await db.getMeta(parseInt(req.query.page),parseInt(req.query.size),{'brand': req.query.brand});
+  }
+  else{
+    res = await db.findPage(parseInt(req.query.page),parseInt(req.query.size));
+    meta = await db.getMeta(parseInt(req.query.page),parseInt(req.query.size));
+  }
+  
+  
+  let products = {
+    "success" : true,
+    "data" : {
+    "result" : res,
+    "meta": meta
+      }}
+  response.send(products);
 
-      }else{
-        const result = await db.find({},{_id:0},1,parseInt(query.size))
-        response.send(result)}
-    }
-    else if(query.brand){
-      const result = await db.find({"brand" : query.brand},{_id:0})
-      response.send(result)
-    }
-    else if (query.price){
-      const result = await db.find({"price" : {$lte : parseInt(query.price)}},{_id:0})
-      response.send(result)
-    }
-    else if(query.brand && query.price){
-      const result = await db.find({"brand" : query.brand, "price" : {$lte : parseInt(query.price)}},{_id : 0})
-      response.send(result)
-    }
-    else if(query.brand && query.size){
-      if(query.page){
-        const result = await db.find({"brand" : query.brand},{_id:0},parseInt(query.page),parseInt(query.size))
-        response.send(result)
-
-      }else{
-        const result = await db.find({"brand" : query.brand},{_id : 0},1,parseInt(query.size))
-        response.send(result)
-      }
-    }
-    else if(query.size && query.price){
-      const result = await db.find({"price" : {$lte : parseInt(query.price)}},{_id : 0},1,parseInt(query.size))
-      response.send(result)
-    }
-    else if(query.size && query.price && query.brand){
-      if(query.page){
-        const result = await db.find({"brand" : query.brand, "price" : {$lte : parseInt(query.price)}},{_id:0},parseInt(query.page),parseInt(query.size))
-        response.send(result)
-      }else{
-        const result = await db.find({"brand" : query.brand, "price" : {$lte : parseInt(query.price)}},{_id : 0},1,parseInt(query.size))
-        response.send(result)}
-    }else {
-			const result = await db.find({},{_id : 0});
-			response.send(result);
-    }
+    
   }catch(e){
     response.send(e)
   }
 })
+
+app.get('', async (req, response) => {
+  console.log("was requested pagination");
+  let res = await db.findPage(parseInt(req.query.page),parseInt(req.query.size))
+  let meta = await db.getMeta(parseInt(req.query.page),parseInt(req.query.size))
+  let products = {
+    "success" : true,
+    "data" : {
+    "result" : res,
+    //"meta" : {"currentPage":req.query.page,"pageCount":?,"pageSize":res.length,"count":?}
+    "meta": meta
+      }
+
+  }
+  response.send(products);
+  
+});
+
 
 
 app.listen(PORT);

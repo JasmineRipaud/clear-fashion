@@ -58,25 +58,75 @@ module.exports.insert = async products => {
   }
 };
 
+
+module.exports.findLimit = async (query,limit) => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    const result = await collection.find(query).limit(limit).toArray();
+    return result;
+  } catch (error) {
+    console.error('🚨 collection.findLimit...', error);
+    return null;
+  }
+};
+
+
+module.exports.getMeta = async(page, size,query=null ) => {
+  const db = await getDB();
+  const collection = db.collection(MONGODB_COLLECTION);
+  let count;
+  if (query==null){
+    count = await collection.count();
+  }
+  else{
+    count = await collection.find(query).count();
+  }
+  
+  const pageCount = Math.ceil(count/size);
+  return {"currentPage" : page,"pageCount":pageCount,"pageSize":size,"count":count} 
+}
+
+module.exports.findPage = async (page,size,query=null) => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    const offset = page ? page * size : 0;
+    let result;
+    if(query==undefined){
+      result = await collection.find({}).skip(offset)
+                  .limit(size).toArray(); 
+    }else{
+      result = await collection.find(query).skip(offset)
+                  .limit(size).toArray(); 
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('🚨 collection.findPage...', error);
+    return null;
+  }
+};
+
+
 /**
  * Find products based on query
  * @param  {Array}  query
  * @return {Array}
  */
- module.exports.find = async (query,filter,page = 0,limit = 0) => {
+ module.exports.find = async query => {
   try {
     const db = await getDB();
     const collection = db.collection(MONGODB_COLLECTION);
-    const result = await collection.find(query).project(filter).sort({price:1}).skip(page).limit(limit).toArray();
-    const count=await collection.countDocuments();
-    let meta = {'count' : count,'page' : page,'page_size' : Array.from(result).length, 'page_count' : Math.ceil(count/Array.from(result).length)}
-    console.log(result,meta)
-    return {result,meta};
+    const result = await collection.find(query).toArray();
+
+    return result;
   } catch (error) {
     console.error('🚨 collection.find...', error);
     return null;
   }
 };
+
 
 /**
  * Close the connection
