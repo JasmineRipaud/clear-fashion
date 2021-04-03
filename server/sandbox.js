@@ -2,7 +2,7 @@ const fsLibrary  = require('fs')
 const dedicatedbrand = require('./sites/dedicatedbrand');
 const loom = require('./sites/loom');
 const toJsonFile = require('./sources/toJsonFile');
-// const mudjeans = require('./sources/mudjeans');
+const mudjeans = require('./sources/mudjeans');
 // const adresseparis = require('./sources/adresseparis');
 const eshops = ['https://www.dedicatedbrand.com/','https://www.loom.fr/','https://mudjeans.eu/','https://adresse.paris/'];
 const {MongoClient} = require('mongodb');
@@ -15,9 +15,9 @@ async function sandbox () {
   try {
     dedicated_products = await dedicated_scrapping(eshops[0]);
     loom_products = await loom_scrapping(eshops[1]);
-    //mudjeans_products = await mudjeans_scrapping(eshops[1]);
+    mudjeans_products = await mudjeans_scrapping(eshops[2]);
     //adresseparis_products = await adresseparis_scrapping(eshops[2])
-    all_products = dedicated_products.concat(loom_products);
+    all_products = dedicated_products.concat(loom_products,mudjeans_products);
 
     
 
